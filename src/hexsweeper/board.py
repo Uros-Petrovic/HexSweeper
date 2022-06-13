@@ -1,5 +1,5 @@
-import random
 import math
+import random
 
 import pygame
 import src.hexsweeper.tile as tile
@@ -10,7 +10,7 @@ RIGHT_MOUSE = 1
 class Board:
 
     @staticmethod
-    def __generateBoard(rowCount: int, columnCount: int, mineCount: int):
+    def __generateBoard(rowCount: int, columnCount: int, mineCount: int, scale: float):
 
         def __checkMine(board_, col_, row_, colIncrement: int, rowIncrement: int) -> int:
             
@@ -42,13 +42,16 @@ class Board:
                 if col % 2 == 0:
 
                     #rowTiles.append(tile.Tile(False, False, row * 96 + 48, col * 64 - col * 32))
-                    rowTiles.append(tile.Tile(False, False, row * 64 + 32, col * 64 - col * 16))
+                    #rowTiles.append(tile.Tile(False, False, row * 64 + 32, col * 64 - col * 16))
+
+                    rowTiles.append(tile.Tile(False, False, row * scale + scale / 2, col * scale - col * scale / 4))
 
                 else:
             
                     #rowTiles.append(tile.Tile(False, False, row * 96, col * 64 - col * 32))
+                    #rowTiles.append(tile.Tile(False, False, row * 64, col * 64 - col * 16))
 
-                    rowTiles.append(tile.Tile(False, False, row * 64, col * 64 - col * 16))
+                    rowTiles.append(tile.Tile(False, False, row * scale, col * scale - col * scale / 4))
 
             board.append(rowTiles)
 
@@ -78,30 +81,24 @@ class Board:
                 #col, row + 1
                 board[col][row].adjacentMines += __checkMine(board, col, row, 0, 1)
                 
-                if col % 2 == 0:
+                #col - 1, row
+                board[col][row].adjacentMines += __checkMine(board, col, row, -1, 0)                
 
-                    #col + 1, row
-                    board[col][row].adjacentMines += __checkMine(board, col, row, 1, 0)
+                #col + 1, row
+                board[col][row].adjacentMines += __checkMine(board, col, row, 1, 0)
+
+                if col % 2 == 0:
 
                     #col + 1, row + 1
                     board[col][row].adjacentMines += __checkMine(board, col, row, 1, 1)         
-                    
-                    #col - 1, row
-                    board[col][row].adjacentMines += __checkMine(board, col, row, -1, 0)
                     
                     #col + 1, row + 1
                     board[col][row].adjacentMines += __checkMine(board, col, row, -1, 1)
 
                 else:
-                    
-                    #col + 1, row
-                    board[col][row].adjacentMines += __checkMine(board, col, row, 1, 0)
 
                     #col + 1, row - 1
                     board[col][row].adjacentMines += __checkMine(board, col, row, 1, -1)
-
-                    #col - 1, row
-                    board[col][row].adjacentMines += __checkMine(board, col, row, -1, 0)
 
                     #col - 1, row - 1
                     board[col][row].adjacentMines += __checkMine(board, col, row, -1, -1)
@@ -114,7 +111,8 @@ class Board:
         self.cols = columns
         self.xOff = xOffSet
         self.yOff = yOffset
-        self.board = Board.__generateBoard(rows, columns, mines)
+        self.scale = tile.updateAssets(columns, rows)
+        self.board = Board.__generateBoard(rows, columns, mines, self.scale)
 
     def drawBoard(self, window, xPos: float, yPos: float) -> None:
 
@@ -128,7 +126,7 @@ class Board:
 
                 self.board[near[0]][near[1]].isHighlighted = True
 
-                tile.drawTile(window, xPos + 1, yPos)
+                tile.drawTile(window, xPos + 1, yPos, self.scale)
         
 
     def printBoard(self) -> None:
@@ -154,8 +152,8 @@ class Board:
             
             for row in range(len(self.board[col])):
 
-                tileX = self.board[col][row].x + self.xOff + 32
-                tileY = self.board[col][row].y + self.yOff + 32
+                tileX = self.board[col][row].x + self.xOff + (self.scale / 2)
+                tileY = self.board[col][row].y + self.yOff + (self.scale / 2)
 
                 distTo = math.sqrt(abs(tileX - mouseX) ** 2 + abs(tileY - mouseY) ** 2)
 
@@ -171,7 +169,22 @@ class Board:
 
         if clickType == LEFT_MOUSE:
             
+            def __revealZeroTiles(col, row):
+
+                if self.board[col][row].adjacentMines == 0 and not self.board[col][row].isMine() and not self.board[col][row].isRevealed():
+                    
+                    self.board[col][row].reveal()
+
+                    for adj in self.getAdjacent(col, row):
+                
+                        __revealZeroTiles(adj[0], adj[1])
+                        self.board[adj[0]][adj[1]].reveal()
+                else:
+                    return          
+
             near = self.getNearestBox()
+
+            __revealZeroTiles(near[0], near[1])
             self.board[near[0]][near[1]].reveal()
 
         elif clickType == RIGHT_MOUSE:
@@ -179,5 +192,56 @@ class Board:
             near = self.getNearestBox()
             self.board[near[0]][near[1]].setFlag()
 
+    def getAdjacent(self, col, row) -> list:
 
+        def __match(matchList: list, col: int, row: int) -> list:
 
+            tempList = []
+
+            for match in matchList:
+            
+                colM = col + match[0]
+                rowM = row + match[1]
+
+                if colM < 0 or rowM < 0:
+
+                    continue
+
+                try:
+                    t = self.board[colM][rowM]
+                    tempList.append([colM, rowM])
+                except IndexError:
+                    continue
+                
+            return tempList
+
+        adjList = []
+
+        GEN_ADJ = [
+            (0, -1),
+            (0, 1),
+            (-1, 0),
+            (1, 0),
+        ]
+
+        EVEN_ADJ = [
+            (1, 1),
+            (-1, 1),
+        ]
+
+        ODD_ADJ = [
+            (1, -1),
+            (-1, -1),
+        ]
+
+        adjList.extend(__match(GEN_ADJ, col, row))
+
+        if col % 2 == 0:
+
+            adjList.extend(__match(EVEN_ADJ, col, row))
+
+        else:
+
+            adjList.extend(__match(ODD_ADJ, col, row))
+
+        return adjList
