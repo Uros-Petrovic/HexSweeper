@@ -1,5 +1,11 @@
 import random
+import math
+
+import pygame
 import src.hexsweeper.tile as tile
+
+LEFT_MOUSE = 0
+RIGHT_MOUSE = 1
 
 class Board:
 
@@ -103,16 +109,24 @@ class Board:
 
         return board
                 
-    def __init__(self, rows: int, columns: int, mines) -> None:
+    def __init__(self, rows: int, columns: int, mines, xOffSet: int = 0, yOffset: int = 0) -> None:
         self.rows = rows
         self.cols = columns
+        self.xOff = xOffSet
+        self.yOff = yOffset
         self.board = Board.__generateBoard(rows, columns, mines)
 
     def drawBoard(self, window, xPos: float, yPos: float) -> None:
 
+        near = self.getNearestBox()
+
         for row in self.board:
 
             for tile in row:
+                
+                tile.isHighlighted = False
+
+                self.board[near[0]][near[1]].isHighlighted = True
 
                 tile.drawTile(window, xPos + 1, yPos)
         
@@ -125,3 +139,45 @@ class Board:
                 print("    ",  end="")
             
             print([tile.revealedStr() for tile in row])
+
+
+    def getNearestBox(self) -> tuple([int, int]):
+        #(self.x + xOff + 32, self.y + yOff + 32))
+
+        mouseX = pygame.mouse.get_pos()[0]
+        mouseY = pygame.mouse.get_pos()[1]
+        closeCol = 0
+        closeRow = 0
+        closestDist = +math.inf
+
+        for col in range(len(self.board)):
+            
+            for row in range(len(self.board[col])):
+
+                tileX = self.board[col][row].x + self.xOff + 32
+                tileY = self.board[col][row].y + self.yOff + 32
+
+                distTo = math.sqrt(abs(tileX - mouseX) ** 2 + abs(tileY - mouseY) ** 2)
+
+                if distTo < closestDist:
+
+                    closeCol = col
+                    closeRow = row
+                    closestDist = distTo
+
+        return (closeCol, closeRow)
+
+    def onMouseInput(self, clickType: int):
+
+        if clickType == LEFT_MOUSE:
+            
+            near = self.getNearestBox()
+            self.board[near[0]][near[1]].reveal()
+
+        elif clickType == RIGHT_MOUSE:
+
+            near = self.getNearestBox()
+            self.board[near[0]][near[1]].setFlag()
+
+
+

@@ -15,7 +15,7 @@ FPS = 60
 icon = pygame.image.load(os.path.join("assets", "hexsweeper", "1Mine.png"))
 pygame.display.set_icon(icon)
 
-b = src.hexsweeper.board.Board(10, 10, 15)
+b = src.hexsweeper.board.Board(10, 10, 15, 0, 0)
 
 def drawScreen():
 
@@ -36,9 +36,19 @@ def main():
         clock.tick(FPS)
 
         for event in pygame.event.get():
-
+            
             if event.type == pygame.QUIT:
                 run = False
+
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+
+                if pygame.mouse.get_pressed()[0]:
+
+                    b.onMouseInput(0)       
+
+                if pygame.mouse.get_pressed()[2]:
+
+                    b.onMouseInput(1)
 
         drawScreen()
     pygame.quit()
