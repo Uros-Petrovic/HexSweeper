@@ -1,4 +1,3 @@
-import math
 import random
 import src.hexsweeper.tile as tile
 
@@ -28,13 +27,22 @@ class Board:
 
         board =  []
 
-        for col in range(rowCount):
+        for col in range(columnCount):
             
             rowTiles = []
 
-            for row in range(columnCount):
+            for row in range(rowCount):
 
-                rowTiles.append(tile.Tile(row, col, False, False))
+                if col % 2 == 0:
+
+                    #rowTiles.append(tile.Tile(False, False, row * 96 + 48, col * 64 - col * 32))
+                    rowTiles.append(tile.Tile(False, False, row * 64 + 32, col * 64 - col * 16))
+
+                else:
+            
+                    #rowTiles.append(tile.Tile(False, False, row * 96, col * 64 - col * 32))
+
+                    rowTiles.append(tile.Tile(False, False, row * 64, col * 64 - col * 16))
 
             board.append(rowTiles)
 
@@ -50,8 +58,6 @@ class Board:
                     
                     board[mineCol][mineRow].setMine(True)
                     break
-        
-        board[4][0].setMine(True)
 
         for col in range(len(board)):
             
@@ -95,15 +101,27 @@ class Board:
                     board[col][row].adjacentMines += __checkMine(board, col, row, -1, -1)
 
 
-
-        for row in board:
-
-            if board.index(row) % 2 == 0:
-                print("    ",  end="")
-            
-            print([tile.printRevealed() for tile in row])
+        return board
                 
     def __init__(self, rows: int, columns: int, mines) -> None:
         self.rows = rows
         self.cols = columns
         self.board = Board.__generateBoard(rows, columns, mines)
+
+    def drawBoard(self, window, xPos: float, yPos: float) -> None:
+
+        for row in self.board:
+
+            for tile in row:
+
+                tile.drawTile(window, xPos + 1, yPos)
+        
+
+    def printBoard(self) -> None:
+
+        for row in self.board:
+
+            if self.board.index(row) % 2 == 0:
+                print("    ",  end="")
+            
+            print([tile.revealedStr() for tile in row])
