@@ -1,14 +1,14 @@
-import pygame
 import os
 
-import src.hexsweeper.tile as tile
-import src.hexsweeper.board as board
+import pygame
 
-import main
+import src.hexsweeper.board as board
+import src.hexsweeper.menu.menus as menus
+import src.hexsweeper.tile as tile
 
 pygame.init()
 
-WIDTH, HEIGHT = 1000, 1000
+WIDTH, HEIGHT = 1440, 810
 WIN = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("HexSweeper")
 
@@ -20,13 +20,16 @@ FPS = 30
 icon = pygame.image.load(os.path.join("assets", "hexsweeper", "1Mine.png"))
 pygame.display.set_icon(icon)
 
-b = board.Board(25, 25, 75, 0, 0)
+#b = board.Board(25, 25, 75, 0, 0)
+
 def drawScreen():
 
     #WIN.fill(WHITE_COLOR)
     #WIN.fill((255, 255, 0))
-    WIN.fill(BLACK_COLOR)
-    b.drawBoard(WIN, 0, 0)
+    #WIN.fill(BLACK_COLOR)
+    #b.drawBoard(WIN, 0, 0)
+
+    menus.activeMenu.updateScreen(WIN)
 
     pygame.display.update()
 
@@ -35,6 +38,8 @@ def main():
 
     #initAssets()
 
+    menus.setMenuDims(WIDTH, HEIGHT)
+    menus.activeMenu = menus.MainMenu()
     clock = pygame.time.Clock()
     run = True
     while run:
@@ -50,11 +55,15 @@ def main():
 
                 if pygame.mouse.get_pressed()[0]:
 
-                    b.onMouseInput(0)       
+                    menus.activeMenu.handleInput()
 
-                if pygame.mouse.get_pressed()[2]:
+                #if pygame.mouse.get_pressed()[0]:
 
-                    b.onMouseInput(1)
+                    #b.onMouseInput(0)       
+
+                #if pygame.mouse.get_pressed()[2]:
+
+                    #b.onMouseInput(1)
 
         drawScreen()
     pygame.quit()
