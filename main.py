@@ -9,8 +9,9 @@ import src.hexsweeper.tile as tile
 pygame.init()
 
 WIDTH, HEIGHT = 1440, 810
+#WIDTH, HEIGHT = 720, 405
 WIN = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("HexSweeper")
+pygame.display.set_caption("HexDweeper")
 
 WHITE_COLOR = (255, 255, 255)
 BLACK_COLOR = (0, 0, 0)
@@ -52,18 +53,7 @@ def main():
                 run = False
 
             elif event.type == pygame.MOUSEBUTTONDOWN:
-
-                if pygame.mouse.get_pressed()[0]:
-
-                    menus.activeMenu.handleInput()
-
-                #if pygame.mouse.get_pressed()[0]:
-
-                    #b.onMouseInput(0)       
-
-                #if pygame.mouse.get_pressed()[2]:
-
-                    #b.onMouseInput(1)
+                menus.activeMenu.handleInput()
 
         drawScreen()
     pygame.quit()

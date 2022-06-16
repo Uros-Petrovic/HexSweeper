@@ -17,20 +17,21 @@ class Button:
         self.width = width
         self.height = height
         self.isHighlighted = False
+        self.font = pygame.font.Font("freesansbold.ttf", int(height / 4))
         button.font = pygame.font.Font("freesansbold.ttf", 16)
         
     def drawButton(self, window: pygame.Surface) -> None:
         
         if self.isHighlighted:
             
-            window.blit(BUTTON_HIGHLIGHT_BACKGROUND.convert_alpha(), (self.x, self.y))
+            window.blit(pygame.transform.scale(BUTTON_HIGHLIGHT_BACKGROUND.convert_alpha(), (self.width, self.height)), (self.x, self.y))
 
         else:
 
-            window.blit(BUTTON_BACKGROUND.convert_alpha(), (self.x, self.y))
+            window.blit(pygame.transform.scale(BUTTON_BACKGROUND.convert_alpha(), (self.width, self.height)), (self.x, self.y))
 
-        text = button.font.render(self.text, True, (0, 0, 0)).convert_alpha()
-        window.blit(text, (self.x + 64 - font.size(self.text)[0] / 2, self.y + 32 - font.size(self.text)[1] / 2))
+        text = self.font.render(self.text, True, (0, 0, 0)).convert_alpha()
+        window.blit(text, (self.x + self.width / 2 - self.font.size(self.text)[0] / 2, self.y + self.height / 2 - self.font.size(self.text)[1] / 2))
 
     def doesCollide(self, mouseX: float, mouseY: float) -> bool:
 

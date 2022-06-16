@@ -1,11 +1,11 @@
-from pprint import pprint
-import pygame
 import os
 
+import pygame
 import src.hexsweeper.board as board
-from .imenu import IMenu
 import src.hexsweeper.menu.menus as menus
+
 from .button import Button
+from .imenu import IMenu
 
 activeMenu: IMenu = None
 MENU_WIDTH: int; MENU_HEIGHT: int = None, None
@@ -24,32 +24,36 @@ class MainMenu(IMenu):
     def __init__(self) -> None:
         width = menus.MENU_WIDTH
         height = menus.MENU_HEIGHT
+        buttonWidth = round(128 * (width / 1440))
+        buttonHeight = round(64 * (height / 810))
         MainMenu.updateAssets(width, height)
-        MainMenu.buttonList.append(Button("Start Game", 128, 64, width / 2 - 64, height / 2 - 32, 0))
-        MainMenu.buttonList.append(Button("Settings", 128, 64, width / 2 - 64, height / 2 - 32 + 100, 1))
-        MainMenu.buttonList.append(Button("Quit", 128, 64, width / 2 - 64, height / 2 - 32 + 200, 2))
+        MainMenu.buttonList.append(Button("Start Game", buttonWidth, buttonHeight, width / 2 - buttonWidth / 2, height / 2 - buttonHeight * 2, 0))
+        MainMenu.buttonList.append(Button("Settings", buttonWidth, buttonHeight, width / 2 - buttonWidth / 2, height / 2, 1))
+        MainMenu.buttonList.append(Button("Quit", buttonWidth, buttonHeight, width / 2 - buttonWidth / 2, height / 2 + buttonHeight * 2, 2))
 
     def drawBackground(self, window: pygame.Surface, ) -> None:
         window.blit(MainMenu.MAIN_MENU_BACKGROUND_SCALED, (0, 0))
 
     def handleInput(self) -> None:
-        
-        for button in MainMenu.buttonList:
 
-            if button.isHighlighted:
-                
-                if button.id == 0:
+        if pygame.mouse.get_pressed()[0]:
+
+            for button in MainMenu.buttonList:
+
+                if button.isHighlighted:
                     
-                    self.closeMenu()
-                    menus.activeMenu = GameMenu()
+                    if button.id == 0:
+                        
+                        self.closeMenu()
+                        menus.activeMenu = GameMenu(10, 10, 25)
 
-                elif button.id == 1:
-                    self.closeMenu()
-                    menus.activeMenu = SettingsMenu()
+                    elif button.id == 1:
+                        self.closeMenu()
+                        menus.activeMenu = SettingsMenu()
 
-                elif button.id == 2:
+                    elif button.id == 2:
 
-                    pygame.quit()
+                        pygame.quit()
 
     def closeMenu(self) -> None:
         MainMenu.MAIN_MENU_BACKGROUND_SCALED = None
@@ -88,36 +92,38 @@ class SettingsMenu(IMenu):
         window.fill((0, 0, 0))
 
     def handleInput(self) -> None:
-        
-        for button in SettingsMenu.buttonList:
 
-            if button.isHighlighted:
+        if pygame.mouse.get_pressed()[0]:
 
-                if button.id == 0:
-                    #TODO Increase volume
-                    pass
+            for button in SettingsMenu.buttonList:
 
-                elif button.id == 1:
-                    #TODO Decrease volume
-                    pass
+                if button.isHighlighted:
 
-                elif button.id == 2:
-                    #TODO Increase SFX
-                    pass
+                    if button.id == 0:
+                        #TODO Increase volume
+                        pass
 
-                elif button.id == 3:
-                    #TODO Decrease SFX:
-                    pass
+                    elif button.id == 1:
+                        #TODO Decrease volume
+                        pass
 
-                elif button.id == 4:
-                    print("XD")
-                    self.closeMenu()
-                    menus.activeMenu = MainMenu()
+                    elif button.id == 2:
+                        #TODO Increase SFX
+                        pass
+
+                    elif button.id == 3:
+                        #TODO Decrease SFX:
+                        pass
+
+                    elif button.id == 4:
+                        self.closeMenu()
+                        menus.activeMenu = MainMenu()
 
     def closeMenu(self) -> None:
         SettingsMenu.buttonList.clear()
 
     def updateAssets(width, height) -> None:
+        #No assets
         pass
 
     def updateScreen(self, window: pygame.Surface) -> None:
@@ -134,19 +140,35 @@ class SettingsMenu(IMenu):
 
 class GameMenu(IMenu):
 
-    gameBoard: board.Board = None
+    def __init__(self, columns: int, rows: int, mines: int) -> None:
+        width = menus.MENU_WIDTH
+        height = menus.MENU_HEIGHT   
+        GameMenu.updateAssets(width, height)
 
-    def initMenu(self) -> None:
-        return super().initMenu()
+        self.gameBoard = board.Board(columns, rows, mines)
 
-    def drawBackground(self) -> None:
-        return super().drawBackground()
+
+    def drawBackground(self, window: pygame.Surface) -> None:
+        window.fill((0, 0, 0))
 
     def handleInput(self) -> None:
-        return super().handleInput()
+        
+        print(pygame.mouse.get_pressed())
 
-    def drawMenu(self) -> None:
-        return super().drawMenu()
+        if pygame.mouse.get_pressed()[0]:
+
+            self.gameBoard.onMouseInput(0)
+
+        elif pygame.mouse.get_pressed()[2]:
+
+            self.gameBoard.onMouseInput(1)
 
     def closeMenu(self) -> None:
-        return super().closeMenu()
+        pass
+
+    def updateAssets(width, height) -> None:
+        pass
+
+    def updateScreen(self, window: pygame.Surface) -> None:
+        self.drawBackground(window)
+        self.gameBoard.drawBoard(window, 0, 0)
