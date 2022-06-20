@@ -1,8 +1,10 @@
 import os
+import threading
 
 import pygame
 import src.hexsweeper.board as board
 import src.hexsweeper.menu.menus as menus
+from src.hexsweeper.menu.slider import Slider
 
 from .button import Button
 from .imenu import IMenu
@@ -77,21 +79,25 @@ class MainMenu(IMenu):
 class SettingsMenu(IMenu):
 
     buttonList = []
+    sliderList = []
 
     def __init__(self) -> None:
         width = menus.MENU_WIDTH
         height = menus.MENU_HEIGHT
         SettingsMenu.updateAssets(width, height)
-        SettingsMenu.buttonList.append(Button("Volume +", 128, 64, width / 2 - 128, height / 2 - 32 - 64, 0))
-        SettingsMenu.buttonList.append(Button("Volume -", 128, 64, width / 2 + 0, height / 2 - 32 - 64, 1))
-        SettingsMenu.buttonList.append(Button("SFX +", 128, 64, width / 2 - 128, height / 2 - 32 + 64, 2))
-        SettingsMenu.buttonList.append(Button("SFX -", 128, 64, width / 2 + 0, height / 2 - 32 + 64, 3))
+        #SettingsMenu.buttonList.append(Button("Volume +", 128, 64, width / 2 - 128, height / 2 - 32 - 64, 0))
+        #SettingsMenu.buttonList.append(Button("Volume -", 128, 64, width / 2 + 0, height / 2 - 32 - 64, 1))
+        #SettingsMenu.buttonList.append(Button("SFX +", 128, 64, width / 2 - 128, height / 2 - 32 + 64, 2))
+        #SettingsMenu.buttonList.append(Button("SFX -", 128, 64, width / 2 + 0, height / 2 - 32 + 64, 3))
         SettingsMenu.buttonList.append(Button("Back", 128, 64, width / 2 - 64, height - 128, 4))
+
+        SettingsMenu.sliderList.append(Slider("Volume {:.0%}", width / 2 - 128, height / 2 - 32 - 64, 256, 64, 0, 100, 50, 10, 0))
+        SettingsMenu.sliderList.append(Slider("SFX {:.0%}", width / 2 - 128, height / 2 - 32 + 64, 256, 64, 0, 100, 50, 10, 1))
 
     def drawBackground(self, window: pygame.Surface) -> None:
         window.fill((0, 0, 0))
 
-    def handleInput(self) -> None:
+    def handleInput(self) -> None:      
 
         if pygame.mouse.get_pressed()[0]:
 
@@ -119,6 +125,45 @@ class SettingsMenu(IMenu):
                         self.closeMenu()
                         menus.activeMenu = MainMenu()
 
+            def updateSliders():
+
+                threadClock = pygame.time.Clock()
+
+                while True:
+
+                    threadClock.tick(30)
+
+                    mouseX = pygame.mouse.get_pos()[0]
+                    mouseY = pygame.mouse.get_pos()[1]  
+
+                    if pygame.mouse.get_pressed()[0]:
+                        
+                        for slider in SettingsMenu.sliderList:
+                        
+                            if slider.isHeld or slider.doesCollide(mouseX, mouseY):
+
+                                slider.moveSliderBar(mouseX, mouseY)
+                                slider.isHeld = True
+
+                    else:
+
+                        for slider in SettingsMenu.sliderList:
+
+                            slider.isHeld = False
+
+                        break
+
+            sliderThread = threading.Thread(target=updateSliders, args=())
+            sliderThread.start()
+
+
+        
+        else:
+
+            for slider in SettingsMenu.sliderList:
+                print("not held")
+                slider.isHeld = False
+
     def closeMenu(self) -> None:
         SettingsMenu.buttonList.clear()
 
@@ -133,6 +178,10 @@ class SettingsMenu(IMenu):
         mouseX = pygame.mouse.get_pos()[0]
         mouseY = pygame.mouse.get_pos()[1]
         
+        for slider in SettingsMenu.sliderList:
+            slider.isHighlighted = slider.doesCollide(mouseX, mouseY)
+            slider.drawSlider(window)
+
         for button in SettingsMenu.buttonList:
             button.isHighlighted = button.doesCollide(mouseX, mouseY)
             button.drawButton(window)
@@ -140,24 +189,58 @@ class SettingsMenu(IMenu):
 
 class GameMenu(IMenu):
 
+    buttonList = []
+
+    quitting: bool = None
+
     def __init__(self, columns: int, rows: int, mines: int) -> None:
         width = menus.MENU_WIDTH
-        height = menus.MENU_HEIGHT   
+        height = menus.MENU_HEIGHT
+        buttonWidth = round(128 * (width / 1440))
+        buttonHeight = round(64 * (height / 810))
+        GameMenu.quitting = False
         GameMenu.updateAssets(width, height)
+        GameMenu.buttonList.append(Button("Exit", buttonWidth, buttonHeight, 0, 0, 0))
+        GameMenu.buttonList.append(Button("Cancel", buttonWidth, buttonHeight, 0, 0, 1))
+        GameMenu.buttonList.append(Button("Confirm", buttonWidth, buttonHeight, 0, buttonHeight, 2))
 
-        self.gameBoard = board.Board(columns, rows, mines)
-
+        self.gameBoard = board.Board(columns, rows, mines, (width, height))
 
     def drawBackground(self, window: pygame.Surface) -> None:
         window.fill((0, 0, 0))
 
     def handleInput(self) -> None:
-        
-        print(pygame.mouse.get_pressed())
 
         if pygame.mouse.get_pressed()[0]:
 
             self.gameBoard.onMouseInput(0)
+
+            if not GameMenu.quitting:
+
+                for button in GameMenu.buttonList:
+
+                    if button.isHighlighted:
+
+                        if button.id == 0:
+
+                            GameMenu.quitting = True
+
+           
+
+            elif GameMenu.quitting:
+
+                for button in GameMenu.buttonList:
+
+                    if button.isHighlighted:
+
+                        if button.id == 1:
+                            
+                            GameMenu.quitting = False
+
+                        elif button.id == 2:
+                            
+                            self.closeMenu()
+                            menus.activeMenu = MainMenu()
 
         elif pygame.mouse.get_pressed()[2]:
 
@@ -166,9 +249,32 @@ class GameMenu(IMenu):
     def closeMenu(self) -> None:
         pass
 
-    def updateAssets(width, height) -> None:
+    def updateAssets(width: int, height: int) -> None:
         pass
 
     def updateScreen(self, window: pygame.Surface) -> None:
+
         self.drawBackground(window)
-        self.gameBoard.drawBoard(window, 0, 0)
+
+        self.gameBoard.drawBoard(window, self.gameBoard.xOffset, 0)
+
+        mouseX = pygame.mouse.get_pos()[0]
+        mouseY = pygame.mouse.get_pos()[1]
+
+        if not GameMenu.quitting:
+
+            for button in GameMenu.buttonList:
+
+                if button.id == 0:
+
+                    button.isHighlighted = button.doesCollide(mouseX, mouseY)
+                    button.drawButton(window)
+
+        elif GameMenu.quitting:
+            
+            for button in GameMenu.buttonList:
+
+                if button.id == 1 or button.id == 2:
+
+                        button.isHighlighted = button.doesCollide(mouseX, mouseY)
+                        button.drawButton(window)

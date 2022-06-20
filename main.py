@@ -11,7 +11,7 @@ pygame.init()
 WIDTH, HEIGHT = 1440, 810
 #WIDTH, HEIGHT = 720, 405
 WIN = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("HexDweeper")
+pygame.display.set_caption("HexSweeper")
 
 WHITE_COLOR = (255, 255, 255)
 BLACK_COLOR = (0, 0, 0)
