@@ -21,14 +21,7 @@ FPS = 30
 icon = pygame.image.load(os.path.join("assets", "hexsweeper", "1Mine.png"))
 pygame.display.set_icon(icon)
 
-#b = board.Board(25, 25, 75, 0, 0)
-
 def drawScreen():
-
-    #WIN.fill(WHITE_COLOR)
-    #WIN.fill((255, 255, 0))
-    #WIN.fill(BLACK_COLOR)
-    #b.drawBoard(WIN, 0, 0)
 
     menus.activeMenu.updateScreen(WIN)
 
@@ -57,14 +50,6 @@ def main():
 
         drawScreen()
     pygame.quit()
-
-
-def getDisplay():
-    return WIN
-
-def initAssets():
-    pass
-    #tile.font = pygame.font.Font("freesansbold.ttf", 16)
 
 if __name__ == '__main__':
     main()

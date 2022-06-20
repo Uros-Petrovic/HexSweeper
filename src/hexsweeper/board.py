@@ -1,5 +1,6 @@
 import math
 import random
+from typing import Type
 
 import pygame
 import src.hexsweeper.tile as tile
@@ -106,13 +107,12 @@ class Board:
 
         return board
                 
-    def __init__(self, rows: int, columns: int, mines, xOffSet: int = 0, yOffset: int = 0) -> None:
+    def __init__(self, columns: int, rows: int, mines: int, windowSize: tuple([int, int])) -> None:
         self.rows = rows
         self.cols = columns
-        self.xOff = xOffSet
-        self.yOff = yOffset
-        self.scale = tile.updateAssets(columns, rows)
+        self.scale = tile.updateAssets(columns, rows, windowSize)
         self.board = Board.__generateBoard(rows, columns, mines, self.scale)
+        self.xOffset =  (windowSize[0] - (self.scale * self.rows + self.scale / 2)) / 2
 
     def drawBoard(self, window, xPos: float, yPos: float) -> None:
 
@@ -123,8 +123,14 @@ class Board:
             for tile in row:
                 
                 tile.isHighlighted = False
+                
+                try:
 
-                self.board[near[0]][near[1]].isHighlighted = True
+                    self.board[near[0]][near[1]].isHighlighted = True
+
+                except TypeError:
+
+                    pass
 
                 tile.drawTile(window, xPos + 1, yPos, self.scale)
         
@@ -152,8 +158,8 @@ class Board:
             
             for row in range(len(self.board[col])):
 
-                tileX = self.board[col][row].x + self.xOff + (self.scale / 2)
-                tileY = self.board[col][row].y + self.yOff + (self.scale / 2)
+                tileX = self.board[col][row].x + self.xOffset + (self.scale / 2)
+                tileY = self.board[col][row].y + (self.scale / 2)
 
                 distTo = math.sqrt(abs(tileX - mouseX) ** 2 + abs(tileY - mouseY) ** 2)
 
@@ -163,7 +169,9 @@ class Board:
                     closeRow = row
                     closestDist = distTo
 
-        return (closeCol, closeRow)
+        if closestDist <= self.scale / 2: 
+
+            return (closeCol, closeRow)
 
     def onMouseInput(self, clickType: int):
 
@@ -182,15 +190,28 @@ class Board:
                 else:
                     return          
 
-            near = self.getNearestBox()
+            try:
 
-            __revealZeroTiles(near[0], near[1])
-            self.board[near[0]][near[1]].reveal()
+                near = self.getNearestBox()
+
+                __revealZeroTiles(near[0], near[1])
+                self.board[near[0]][near[1]].reveal()
+
+
+            except TypeError:
+
+                pass
 
         elif clickType == RIGHT_MOUSE:
+            
+            try:
 
-            near = self.getNearestBox()
-            self.board[near[0]][near[1]].setFlag()
+                near = self.getNearestBox()
+                self.board[near[0]][near[1]].setFlag()
+
+            except TypeError:
+
+                pass
 
     def getAdjacent(self, col, row) -> list:
 
