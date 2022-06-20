@@ -2,9 +2,8 @@ import os
 
 import pygame
 
-import src.hexsweeper.board as board
 import src.hexsweeper.menu.menus as menus
-import src.hexsweeper.tile as tile
+import src.hexsweeper.config as config
 
 pygame.init()
 
@@ -31,7 +30,7 @@ def drawScreen():
 def main():
 
     #initAssets()
-
+    config.configuration.loadConfig()
     menus.setMenuDims(WIDTH, HEIGHT)
     menus.activeMenu = menus.MainMenu()
     clock = pygame.time.Clock()

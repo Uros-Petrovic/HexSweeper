@@ -1,8 +1,8 @@
 import os
-import threading
 
 import pygame
 import src.hexsweeper.board as board
+import src.hexsweeper.config as config
 import src.hexsweeper.menu.menus as menus
 from src.hexsweeper.menu.slider import Slider
 
@@ -84,15 +84,18 @@ class SettingsMenu(IMenu):
     def __init__(self) -> None:
         width = menus.MENU_WIDTH
         height = menus.MENU_HEIGHT
-        SettingsMenu.updateAssets(width, height)
-        #SettingsMenu.buttonList.append(Button("Volume +", 128, 64, width / 2 - 128, height / 2 - 32 - 64, 0))
-        #SettingsMenu.buttonList.append(Button("Volume -", 128, 64, width / 2 + 0, height / 2 - 32 - 64, 1))
-        #SettingsMenu.buttonList.append(Button("SFX +", 128, 64, width / 2 - 128, height / 2 - 32 + 64, 2))
-        #SettingsMenu.buttonList.append(Button("SFX -", 128, 64, width / 2 + 0, height / 2 - 32 + 64, 3))
-        SettingsMenu.buttonList.append(Button("Back", 128, 64, width / 2 - 64, height - 128, 4))
 
-        SettingsMenu.sliderList.append(Slider("Volume {:.0%}", width / 2 - 128, height / 2 - 32 - 64, 256, 64, 0, 100, 50, 10, 0))
-        SettingsMenu.sliderList.append(Slider("SFX {:.0%}", width / 2 - 128, height / 2 - 32 + 64, 256, 64, 0, 100, 50, 10, 1))
+        buttonWidth = round(128 * (width / 1440))
+        buttonHeight = round(64 * (height / 810))
+
+        #SettingsMenu.updateAssets(width, height)
+        SettingsMenu.buttonList.append(Button("Back", buttonWidth, buttonHeight, width / 2 - buttonWidth / 2, height - buttonHeight * 2, 4))
+
+        sliderWidth = round(256 * (width / 1440))
+        sliderHeight = round(64 * (height / 810))
+
+        SettingsMenu.sliderList.append(Slider("Volume {:.0%}", width / 2 - sliderWidth / 2, sliderHeight,     sliderWidth, sliderHeight, 0, 100, config.configuration.attributes["Volume"], 0))
+        SettingsMenu.sliderList.append(Slider("SFX {:.0%}",    width / 2 - sliderWidth / 2, sliderHeight * 3, sliderWidth, sliderHeight, 0, 100, config.configuration.attributes["Sfx"], 1))
 
     def drawBackground(self, window: pygame.Surface) -> None:
         window.fill((0, 0, 0))
@@ -125,50 +128,27 @@ class SettingsMenu(IMenu):
                         self.closeMenu()
                         menus.activeMenu = MainMenu()
 
-            def updateSliders():
+            for slider in SettingsMenu.sliderList:
 
-                threadClock = pygame.time.Clock()
+                if slider.doesCollideX(pygame.mouse.get_pos()[0]):
 
-                while True:
-
-                    threadClock.tick(30)
-
-                    mouseX = pygame.mouse.get_pos()[0]
-                    mouseY = pygame.mouse.get_pos()[1]  
-
-                    if pygame.mouse.get_pressed()[0]:
-                        
-                        for slider in SettingsMenu.sliderList:
-                        
-                            if slider.isHeld or slider.doesCollide(mouseX, mouseY):
-
-                                slider.moveSliderBar(mouseX, mouseY)
-                                slider.isHeld = True
-
-                    else:
-
-                        for slider in SettingsMenu.sliderList:
-
-                            slider.isHeld = False
-
-                        break
-
-            sliderThread = threading.Thread(target=updateSliders, args=())
-            sliderThread.start()
-
-
+                    slider.updateUntilRelease()
         
         else:
 
             for slider in SettingsMenu.sliderList:
-                print("not held")
                 slider.isHeld = False
 
     def closeMenu(self) -> None:
+        config.configuration.attributes["Volume"] = SettingsMenu.sliderList[0].value
+        config.configuration.attributes["Sfx"] = SettingsMenu.sliderList[1].value
+        config.configuration.saveConfig()
         SettingsMenu.buttonList.clear()
 
+
+
     def updateAssets(width, height) -> None:
-        #No assets
+        
         pass
 
     def updateScreen(self, window: pygame.Surface) -> None:
@@ -185,6 +165,8 @@ class SettingsMenu(IMenu):
         for button in SettingsMenu.buttonList:
             button.isHighlighted = button.doesCollide(mouseX, mouseY)
             button.drawButton(window)
+
+        
 
 
 class GameMenu(IMenu):

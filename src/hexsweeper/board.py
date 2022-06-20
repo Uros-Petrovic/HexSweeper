@@ -1,6 +1,5 @@
 import math
 import random
-from typing import Type
 
 import pygame
 import src.hexsweeper.tile as tile
