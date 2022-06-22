@@ -6,6 +6,7 @@ import src.hexsweeper.menu.menus as menus
 import src.hexsweeper.config as config
 
 pygame.init()
+pygame.mixer.init(frequency=22050, size=-16, channels=2, buffer=4096)
 
 WIDTH, HEIGHT = 1440, 810
 #WIDTH, HEIGHT = 720, 405
@@ -29,6 +30,8 @@ def drawScreen():
 
 def main():
 
+    #pygame.mixer.Sound(os.path.join("assets", "hexsweeper", "MenuMusic.mp3")).play(-1)
+    
     #initAssets()
     config.configuration.loadConfig()
     menus.setMenuDims(WIDTH, HEIGHT)
@@ -38,6 +41,8 @@ def main():
     while run:
 
         clock.tick(FPS)
+
+        pygame.mixer.music.set_volume(config.configuration.getAttribute("Music") / 100)
 
         for event in pygame.event.get():
             

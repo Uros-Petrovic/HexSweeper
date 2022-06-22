@@ -1,10 +1,13 @@
 import pygame
 import os
 import threading
+import src.hexsweeper.config as config
 
 SLIDER_BACKGROUND_IMAGE = pygame.image.load(os.path.join("assets", "hexsweeper", "SliderBackground.png"))
 SLIDER_BAR_IMAGE = pygame.image.load(os.path.join("assets", "hexsweeper", "SliderBar.png"))
 
+SLIDER_BACKGROUND_HIGHLIGHT_IMAGE = pygame.image.load(os.path.join("assets", "hexsweeper", "SliderBackgroundHighlight.png"))
+SLIDER_BAR_HIGHLIGHT_IMAGE = pygame.image.load(os.path.join("assets", "hexsweeper", "SliderBarHighlight.png"))
 
 class Slider:
 
@@ -26,8 +29,8 @@ class Slider:
 
     def drawSlider(self, window: pygame.surface.Surface):
         
-        SCALED_BG = pygame.transform.scale(SLIDER_BACKGROUND_IMAGE, (self.width, self.height)).convert_alpha()
-        SCALED_BAR = pygame.transform.scale(SLIDER_BAR_IMAGE, (self.width / 16, self.height)).convert_alpha()
+        SCALED_BG = pygame.transform.scale(SLIDER_BACKGROUND_HIGHLIGHT_IMAGE, (self.width, self.height)) if self.isHighlighted else pygame.transform.scale(SLIDER_BACKGROUND_IMAGE, (self.width, self.height)).convert_alpha()
+        SCALED_BAR = pygame.transform.scale(SLIDER_BAR_HIGHLIGHT_IMAGE, (self.width / 16, self.height)) if self.isHighlighted else pygame.transform.scale(SLIDER_BAR_IMAGE, (self.width / 16, self.height)).convert_alpha()
         text = self.font.render(self.text.format(self.value / 100), False, (0, 0 ,0))
 
         window.blit(SCALED_BG, (self.x, self.y))
@@ -75,6 +78,13 @@ class Slider:
 
                             self.moveSliderBar(mouseX, mouseY)
                             self.isHeld = True
+
+                            if self.id == 0:
+                                config.configuration.attributes["Music"] = self.value
+                            elif self.id == 1:
+                                config.configuration.attributes["Sfx"] = self.value
+
+                            config.configuration.saveConfig()
 
                 else:
 

@@ -1,3 +1,4 @@
+from ast import PyCF_ALLOW_TOP_LEVEL_AWAIT
 import os
 
 import pygame
@@ -32,6 +33,10 @@ class MainMenu(IMenu):
         MainMenu.buttonList.append(Button("Start Game", buttonWidth, buttonHeight, width / 2 - buttonWidth / 2, height / 2 - buttonHeight * 2, 0))
         MainMenu.buttonList.append(Button("Settings", buttonWidth, buttonHeight, width / 2 - buttonWidth / 2, height / 2, 1))
         MainMenu.buttonList.append(Button("Quit", buttonWidth, buttonHeight, width / 2 - buttonWidth / 2, height / 2 + buttonHeight * 2, 2))
+
+        
+        pygame.mixer.music.load(os.path.join(".", "assets", "hexsweeper", "MainMenuMusic.mp3"))
+        pygame.mixer.music.play(-1)
 
     def drawBackground(self, window: pygame.Surface, ) -> None:
         window.blit(MainMenu.MAIN_MENU_BACKGROUND_SCALED, (0, 0))
@@ -94,8 +99,11 @@ class SettingsMenu(IMenu):
         sliderWidth = round(256 * (width / 1440))
         sliderHeight = round(64 * (height / 810))
 
-        SettingsMenu.sliderList.append(Slider("Volume {:.0%}", width / 2 - sliderWidth / 2, sliderHeight,     sliderWidth, sliderHeight, 0, 100, config.configuration.attributes["Volume"], 0))
-        SettingsMenu.sliderList.append(Slider("SFX {:.0%}",    width / 2 - sliderWidth / 2, sliderHeight * 3, sliderWidth, sliderHeight, 0, 100, config.configuration.attributes["Sfx"], 1))
+        SettingsMenu.sliderList.append(Slider("Music {:.0%}", width / 2 - sliderWidth / 2, sliderHeight,     sliderWidth, sliderHeight, 0, 100, config.configuration.getAttribute("Music"), 0))
+        SettingsMenu.sliderList.append(Slider("SFX {:.0%}",    width / 2 - sliderWidth / 2, sliderHeight * 3, sliderWidth, sliderHeight, 0, 100, config.configuration.getAttribute("Sfx"), 1))
+
+        pygame.mixer.music.load(os.path.join("assets", "hexsweeper", "SettingsMenuMusic.mp3"))
+        pygame.mixer.music.play(-1)
 
     def drawBackground(self, window: pygame.Surface) -> None:
         window.fill((0, 0, 0))
@@ -140,10 +148,8 @@ class SettingsMenu(IMenu):
                 slider.isHeld = False
 
     def closeMenu(self) -> None:
-        config.configuration.attributes["Volume"] = SettingsMenu.sliderList[0].value
-        config.configuration.attributes["Sfx"] = SettingsMenu.sliderList[1].value
-        config.configuration.saveConfig()
         SettingsMenu.buttonList.clear()
+        SettingsMenu.sliderList.clear()
 
 
 
