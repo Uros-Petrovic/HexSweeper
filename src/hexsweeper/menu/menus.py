@@ -1,4 +1,5 @@
 from ast import PyCF_ALLOW_TOP_LEVEL_AWAIT
+import enum
 import os
 
 import pygame
@@ -12,6 +13,21 @@ from .imenu import IMenu
 
 activeMenu: IMenu = None
 MENU_WIDTH: int; MENU_HEIGHT: int = None, None
+
+credits_text = [
+    "Credits:",
+    "",
+    "   Coding      - Uros Petrovic",
+    "   Game Design - Uros Petrovic",
+    "   Music       - Death Rally (Not owned by me)",
+    "   Game Assets - Uros Petrovic, Ryan Zhu",
+    "",
+    "   *Original game idea of MineSweeper is not mine",
+    "",
+    "   Thanks to those who helped me making this game,",
+    "   I had a lot of fun making this game and I hope",
+    "   that it's a good demonstration of my skills.",
+]
 
 def setMenuDims(width: int, height: int):
     menus.MENU_WIDTH = width
@@ -108,6 +124,16 @@ class SettingsMenu(IMenu):
     def drawBackground(self, window: pygame.Surface) -> None:
         window.fill((0, 0, 0))
 
+    def drawCredits(self, window: pygame.Surface) -> None:
+            
+        font = pygame.font.Font("freesansbold.ttf", int(menus.MENU_WIDTH / 128))
+
+        for i, line in enumerate(menus.credits_text):
+            
+            text = font.render(line, True, (255, 255, 255))
+
+            window.blit(text, (0, (font.size(line)[1] + 4) * i))
+
     def handleInput(self) -> None:      
 
         if pygame.mouse.get_pressed()[0]:
@@ -161,11 +187,12 @@ class SettingsMenu(IMenu):
         
         self.drawBackground(window)
 
+        self.drawCredits(window)
+
         mouseX = pygame.mouse.get_pos()[0]
         mouseY = pygame.mouse.get_pos()[1]
         
         for slider in SettingsMenu.sliderList:
-            slider.isHighlighted = slider.doesCollide(mouseX, mouseY)
             slider.drawSlider(window)
 
         for button in SettingsMenu.buttonList:

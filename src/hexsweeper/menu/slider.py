@@ -37,8 +37,8 @@ class Slider:
         window.blit(SCALED_BAR, (self.x + self.value / self.max * self.width - SCALED_BAR.get_width() / 2, self.y))
         window.blit(text, (self.x + self.width / 2 - self.font.size(self.text)[0] / 2, self.y + self.height / 2 - self.font.size(self.text)[1] / 2))
 
-    def moveSliderBar(self, mouseX: float, mouseY: float):
-    
+    def moveSliderBar(self, mouseX: float):
+        
         pixels: float = min(max(mouseX - self.x, 0), self.width)
         self.value = self.min + self.max * (pixels / self.width)
         
@@ -76,18 +76,20 @@ class Slider:
                     
                     if self.isHeld or self.doesCollide(mouseX, mouseY):
 
-                            self.moveSliderBar(mouseX, mouseY)
-                            self.isHeld = True
+                        self.moveSliderBar(mouseX)
+                        self.isHeld = True
 
-                            if self.id == 0:
-                                config.configuration.attributes["Music"] = self.value
-                            elif self.id == 1:
-                                config.configuration.attributes["Sfx"] = self.value
+                        if self.id == 0:
+                            config.configuration.attributes["Music"] = self.value
+                        elif self.id == 1:
+                            config.configuration.attributes["Sfx"] = self.value
 
-                            config.configuration.saveConfig()
+                        config.configuration.saveConfig()
+                        self.isHighlighted = True
 
                 else:
 
+                    self.isHighlighted = False
                     self.isHeld = False
                     break
 
