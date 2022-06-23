@@ -68,7 +68,7 @@ class MainMenu(IMenu):
                     if button.id == 0:
                         
                         self.closeMenu()
-                        menus.activeMenu = GameMenu(10, 10, 25)
+                        menus.activeMenu = GameMenu(10, 10, 1)
 
                     elif button.id == 1:
                         self.closeMenu()
@@ -225,6 +225,8 @@ class GameMenu(IMenu):
         window.fill((0, 0, 0))
 
     def handleInput(self) -> None:
+
+        print(self.gameBoard.gameStatus)
 
         if pygame.mouse.get_pressed()[0]:
 

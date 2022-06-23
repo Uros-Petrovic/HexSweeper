@@ -112,6 +112,8 @@ class Board:
         self.scale = tile.updateAssets(columns, rows, windowSize)
         self.board = Board.__generateBoard(rows, columns, mines, self.scale)
         self.xOffset =  (windowSize[0] - (self.scale * self.rows + self.scale / 2)) / 2
+        self.gameStatus = False # False = ongoing; True = win
+        self.minesHit = 0
 
     def drawBoard(self, window, xPos: float, yPos: float) -> None:
 
@@ -194,8 +196,15 @@ class Board:
                 near = self.getNearestBox()
 
                 __revealZeroTiles(near[0], near[1])
-                self.board[near[0]][near[1]].reveal()
 
+                if self.board[near[0]][near[1]].isMine():
+                    
+                    self.minesHit += 1
+
+                self.board[near[0]][near[1]].reveal()
+                
+                self.isWin()
+                    
 
             except TypeError:
 
@@ -265,3 +274,17 @@ class Board:
             adjList.extend(__match(ODD_ADJ, col, row))
 
         return adjList
+
+    def isWin(self) -> None:
+
+        for row in self.board:
+
+            for tile_ in row:
+
+                if not tile_.isRevealed():
+                    
+                    if not tile_.isMine():
+
+                        return
+        
+        self.gameStatus = True
