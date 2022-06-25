@@ -4,11 +4,7 @@ import pygame
 
 
 class IMenu(metaclass=abc.ABCMeta):
-
-    @abc.abstractmethod
-    def handleInput(self) -> None:
-        """Performs the actions required on click."""
-        raise NotImplementedError
+    """Menu Interface."""
 
     @abc.abstractmethod
     def __init__(self) -> None:
@@ -16,8 +12,13 @@ class IMenu(metaclass=abc.ABCMeta):
         raise NotImplementedError
 
     @abc.abstractmethod
+    def handleInput(self) -> None:
+        """Performs the actions required on click."""
+        raise NotImplementedError
+
+    @abc.abstractmethod
     def drawBackground(self, window: pygame.Surface) -> None:
-        """Draws the background."""
+        """Draws the background of the menu."""
         raise NotImplementedError
 
     @abc.abstractmethod
@@ -26,11 +27,6 @@ class IMenu(metaclass=abc.ABCMeta):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def updateAssets(width, height) -> None:
-        "Updates the assets."
-        raise NotImplementedError
-
-    @abc.abstractmethod
     def updateScreen(self, window: pygame.Surface) -> None:
-        """Updates the screen."""
+        """Updates the screen and draws any necessary assets."""
         raise NotImplementedError
